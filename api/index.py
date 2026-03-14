@@ -134,7 +134,7 @@ app.add_middleware(
 # STATIC FILES & TEMPLATES
 # ═══════════════════════════════════════════════════════════════
 # Use absolute paths for Vercel compatibility
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Check if static folder exists to prevent crashes if forgotten in git
 if (BASE_DIR / "static").exists():
