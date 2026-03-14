@@ -240,14 +240,24 @@ async def bike_detail(
     brands: Optional[str] = None, 
     categories: Optional[str] = None
 ):
+    """Display detailed information for a single bike with filter-aware navigation"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
+        # Get current bike details
         cursor.execute("""
-            SELECT b.id, b.name as bike_name, b.description, b.year, b.image_url, b.website_link,
-                   b.company_id, b.category_id,
-                   c.name as company_name, cat.name as category_name
+            SELECT 
+                b.id,
+                b.name as bike_name,
+                b.description,
+                b.year,
+                b.image_url,
+                b.website_link,
+                b.company_id,
+                b.category_id,
+                c.name as company_name,
+                cat.name as category_name
             FROM bikes b
             JOIN companies c ON b.company_id = c.id
             JOIN categories cat ON b.category_id = cat.id
@@ -260,76 +270,83 @@ async def bike_detail(
             conn.close()
             raise HTTPException(status_code=404, detail="Bike not found")
             
+        # =========================================================
+        # NEXT/PREVIOUS BIKE LOGIC (Filter-Aware)
+        # =========================================================
+        # Base query to find all bikes in the current list
+        query = """
+            SELECT b.id 
+            FROM bikes b
+            JOIN companies c ON b.company_id = c.id
+        """
         params = []
+        where_clauses = ["1=1"]
         
+        # If user arrived via global filter search
         if brands or categories:
-            query = """
-                SELECT b.id 
-                FROM bikes b 
-                JOIN companies c ON b.company_id = c.id
-                WHERE 1=1
-            """
             if brands:
                 brand_ids = [int(x) for x in brands.split(',')]
                 placeholders = ','.join(['%s'] * len(brand_ids))
-                query += f" AND b.company_id IN ({placeholders})"
+                where_clauses.append(f"b.company_id IN ({placeholders})")
                 params.extend(brand_ids)
                 
             if categories:
                 category_ids = [int(x) for x in categories.split(',')]
                 placeholders = ','.join(['%s'] * len(category_ids))
-                query += f" AND b.category_id IN ({placeholders})"
+                where_clauses.append(f"b.category_id IN ({placeholders})")
                 params.extend(category_ids)
                 
-            query += " ORDER BY c.name, b.name"
-            
+        # If user arrived via standard browsing (default to same company/category)
         else:
-            query = """
-                SELECT id 
-                FROM bikes 
-                WHERE company_id = %s AND category_id = %s 
-                ORDER BY name
-            """
-            params = [bike['company_id'], bike['category_id']]
+            where_clauses.append("b.company_id = %s")
+            params.append(bike['company_id'])
+            where_clauses.append("b.category_id = %s")
+            params.append(bike['category_id'])
             
+        # Complete the query to get the full list ordered correctly
+        query += " WHERE " + " AND ".join(where_clauses)
+        query += " ORDER BY c.name, b.name"
+        
         cursor.execute(query, params)
         all_bike_ids = [row['id'] for row in cursor.fetchall()]
+        
         cursor.close()
         conn.close()
         
-        try:
+        # Calculate prev/next with loop
+        if bike_id in all_bike_ids:
             current_index = all_bike_ids.index(bike_id)
-        except ValueError:
-            current_index = 0
-            if not all_bike_ids:
-                all_bike_ids = [bike_id]
-                
-        total_bikes = len(all_bike_ids)
-        prev_bike_id = all_bike_ids[(current_index - 1) % total_bikes]
-        next_bike_id = all_bike_ids[(current_index + 1) % total_bikes]
-        
-        query_string = ""
-        if brands or categories:
-            qs_parts = []
-            if brands:
-                qs_parts.append(f"brands={brands}")
-            if categories:
-                qs_parts.append(f"categories={categories}")
-            query_string = "?" + "&".join(qs_parts)
+            total_bikes = len(all_bike_ids)
+            
+            prev_bike_id = all_bike_ids[(current_index - 1) % total_bikes]
+            next_bike_id = all_bike_ids[(current_index + 1) % total_bikes]
+        else:
+            # Fallback if somehow current bike isn't in the list
+            prev_bike_id = bike_id
+            next_bike_id = bike_id
 
+        # Preserve the query parameters in the URLs so the filter doesn't break
+        query_params = ""
+        if brands or categories:
+            params_list = []
+            if brands: params_list.append(f"brands={brands}")
+            if categories: params_list.append(f"categories={categories}")
+            query_params = "?" + "&".join(params_list)
+
+        prev_url = f"/bike/{prev_bike_id}{query_params}"
+        next_url = f"/bike/{next_bike_id}{query_params}"
+        
         return templates.TemplateResponse("bike_detail.html", {
             "request": request,
             "bike": bike,
-            "prev_bike_id": prev_bike_id,
-            "next_bike_id": next_bike_id,
-            "query_string": query_string  
+            "prev_url": prev_url,
+            "next_url": next_url
         })
-        
     except HTTPException:
         raise
     except Exception as e:
         if DEBUG:
-            print(f"Error in bike_detail: {e}")
+            print(f"❌ Error in bike_detail route: {e}")
             traceback.print_exc()
         raise HTTPException(status_code=500, detail="Internal server error")
 
