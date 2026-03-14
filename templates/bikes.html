@@ -236,7 +236,7 @@
                             <span>{{ bike.category_name }}</span>
                         </div>
                         
-                        <a href="/api/bike/{{ bike.id }}{% if request.query_params %}?{{ request.query_params }}{% endif %}" class="bike-card-btn">
+                        <a href="/bike/{{ bike.id }}{% if request.query_params %}?{{ request.query_params }}{% endif %}" class="bike-card-btn">
                             View Details <span class="arrow">→</span>
                         </a>
                     </div>
