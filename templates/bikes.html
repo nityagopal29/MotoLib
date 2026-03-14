@@ -8,7 +8,7 @@
     .bikes-page {
         min-height: 100vh;
         padding: 120px 5% 80px;
-        /* THE FIX: Standard fixed background attached directly to the main container */
+        background-color: #000;
         background-image: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 100%), url('/static/hero-background.jpg');
         background-size: cover;
         background-position: center;
@@ -42,19 +42,23 @@
         text-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
 
-    /* BIKES GRID - Back to original working code */
+    /* BIKES GRID */
     .bikes-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
         gap: 40px;
+        width: 100%;
     }
 
+    /* THE CARD - Strictly enforcing height */
     .bike-card {
         position: relative;
-        height: 450px;
+        height: 450px !important;
+        min-height: 450px;
+        width: 100%;
         border-radius: 20px;
         overflow: hidden;
-        background: #111;
+        background-color: #111;
         border: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         opacity: 0;
@@ -73,15 +77,23 @@
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7), 0 0 20px rgba(135, 206, 235, 0.2);
     }
 
-    /* ORIGINAL WORKING IMAGE TAG STYLES */
-    .bike-card-image {
+    /* BACKGROUND IMAGE CONTAINER - Physically impossible to stretch out of bounds */
+    .bike-image-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
         transition: transform 0.8s ease;
+        z-index: 0;
     }
 
-    .bike-card:hover .bike-card-image {
+    .bike-card:hover .bike-image-container {
         transform: scale(1.1);
     }
 
@@ -92,6 +104,7 @@
         background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
         z-index: 1;
         transition: background 0.4s ease;
+        pointer-events: none;
     }
 
     .bike-card:hover .bike-card-overlay {
@@ -157,6 +170,8 @@
         text-transform: uppercase;
         transition: all 0.3s ease;
         backdrop-filter: blur(5px);
+        z-index: 3;
+        position: relative;
     }
 
     .bike-card-btn:hover {
@@ -209,24 +224,12 @@
     @media (max-width: 768px) {
         .bikes-page {
             padding: 100px 20px 60px;
-            background-attachment: scroll; /* better for mobile performance */
+            background-attachment: scroll;
         }
-
-        .bikes-title {
-            font-size: 32px;
-        }
-
-        .bikes-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .bike-card {
-            height: 400px;
-        }
-        
-        .no-bikes {
-            padding: 40px 20px;
-        }
+        .bikes-title { font-size: 32px; }
+        .bikes-grid { grid-template-columns: 1fr; }
+        .bike-card { height: 400px !important; min-height: 400px; }
+        .no-bikes { padding: 40px 20px; }
     }
 </style>
 {% endblock %}
@@ -258,11 +261,11 @@
         <div class="bikes-grid">
             {% for bike in bikes %}
                 <div class="bike-card" data-card-index="{{ loop.index0 }}">
-                    <!-- THE ORIGINAL WORKING IMAGE TAG -->
-                    <img src="{{ bike.image_url if bike.image_url else '/static/bikes/default.jpg' }}" 
-                         class="bike-card-image" 
-                         alt="{{ bike.name }}"
-                         onerror="this.src='/static/bikes/default.jpg'">
+                    
+                    <!-- ABSOLUTE DIV WITH BACKGROUND-IMAGE: Will perfectly fill the 450px card, no stretching possible -->
+                    <div class="bike-image-container" 
+                         style="background-image: url('{{ bike.image_url if bike.image_url else '/static/bikes/default.jpg' }}');">
+                    </div>
                     
                     <div class="bike-card-overlay"></div>
                     
@@ -298,7 +301,6 @@
 
 {% block extrascripts %}
 <script>
-    // Animate bike cards on scroll
     const bikeCards = document.querySelectorAll('.bike-card');
     
     const cardObserver = new IntersectionObserver((entries) => {
@@ -307,7 +309,7 @@
                 const index = entry.target.getAttribute('data-card-index');
                 setTimeout(() => {
                     entry.target.classList.add('show-card');
-                }, (index % 3) * 150); // Stagger based on column
+                }, (index % 3) * 150);
                 
                 cardObserver.unobserve(entry.target);
             }
