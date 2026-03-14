@@ -1,0 +1,537 @@
+{% extends "base.html" %}
+
+{% block title %}Select Company — MotoLib{% endblock %}
+
+{% block extra_styles %}
+<style>
+
+  
+  .cards-section{
+  max-width:1400px;
+  margin:auto;
+  display:flex;
+  flex-direction:column;
+  gap:120px;
+  padding:0 5%;
+}
+
+.card-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:100px;
+}
+
+.company-card-wrapper{
+  width:45%;
+  flex-shrink: 0;
+}
+
+.company-card{
+  position:relative;
+  overflow:hidden;
+  border-radius:12px;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.company-img{
+  width:100%;
+  height:100%;
+  display:block;
+  border-radius:12px;
+  object-fit: cover;
+}
+
+.card-desc{
+  width:45%;
+  font-size:16px;
+  line-height:1.7;
+  flex-shrink: 0;
+}
+
+.card-desc h3{
+  font-size:28px;
+  margin-bottom:15px;
+}
+
+.card-overlay{
+  position:absolute;
+  inset:0;
+  background: transparent;
+  border-radius:12px;
+  z-index:1;
+  transition: all 0.3s ease;
+}
+
+.card-content{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  padding:30px;
+  border-radius:12px;
+}
+
+.card-header{
+  display:none;
+}
+
+.card-name{
+  font-size:24px;
+  font-weight:700;
+  color:#fff;
+  margin-bottom:8px;
+}
+
+.card-bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:20px;
+}
+
+.card-tagline{
+  font-size:14px;
+  color:rgba(255,255,255,0.9);
+  margin:0;
+  flex:1;
+  text-align:left;
+}
+
+.card-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  padding:14px 28px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px) saturate(180%);
+  color:#000;
+  text-decoration:none;
+  border-radius:50px;
+  font-weight:700;
+  font-size:16px;
+  transition: all 0.3s ease;
+  cursor:pointer;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  white-space:nowrap;
+  flex-shrink:0;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.card-btn:hover{
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(-5px);
+  color:#87ceeb;
+  box-shadow: 0 12px 40px rgba(135, 206, 235, 0.4);
+}
+
+  /* ── MOBILE RESPONSIVENESS ── */
+  @media (max-width: 768px) {
+    .cards-section {
+      gap: 60px;
+    }
+
+    .card-row {
+      flex-direction: column;
+      gap: 40px;
+    }
+
+    .company-card-wrapper, .card-desc {
+      width: 100% !important;
+      order: unset !important;
+    }
+
+    .card-desc {
+      text-align: center !important;
+    }
+
+    .card-desc h3 {
+      font-size: 24px;
+    }
+
+    .card-desc p {
+      font-size: 14px;
+    }
+
+    .card-content {
+      padding: 20px;
+    }
+
+    .card-bottom {
+      flex-direction: column;
+      align-items:flex-start;
+      gap: 15px;
+    }
+
+    .card-tagline {
+      font-size: 13px;
+      width: 100%;
+    }
+
+    .card-btn {
+      padding: 12px 24px;
+      font-size: 14px;
+    }
+  }
+
+  /* Ensure company cards don't overlap */
+  .companies-container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+  }
+
+  /* If you have a grid layout for companies */
+  .companies-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Company card styling */
+  .company-card {
+    position: relative;
+    background: rgba(20, 20, 20, 0.8);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+
+  .company-card:hover {
+    transform: translateY(-5px);
+  }
+  /* ── COMPANIES HERO SECTION ── */
+  .companies-hero {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .companies-hero-background {
+    position: absolute;
+    inset: 0;
+    background-image: url('/static/companies-hero.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    z-index: 0;
+  }
+
+  .companies-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.95) 0%,
+      rgba(0, 0, 0, 0.7) 40%,
+      rgba(0, 0, 0, 0.5) 70%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+    z-index: 1;
+  }
+
+  .companies-hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 1000px;
+    padding: 0 5%;
+  }
+
+  .companies-hero-title {
+    font-size: 64px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin-bottom: 30px;
+    color: #fff;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeInUp 0.8s ease forwards;
+  }
+
+  .companies-hero-description {
+    font-size: 18px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeIn 0.8s ease 0.3s forwards;
+  }
+
+  .companies-scroll-prompt {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    text-decoration: none;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeInBounce 1s ease 0.6s forwards;
+    cursor: pointer;
+  }
+
+  .companies-scroll-prompt:hover {
+    color: #87ceeb;
+    transform: translateX(-50%) translateY(-5px);
+  }
+
+  .companies-scroll-arrow {
+    display: block;
+    font-size: 20px;
+    margin-top: 10px;
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInBounce {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+
+  /* ── SLIDE-IN ANIMATIONS ── */
+  @keyframes slideInFromRight {
+    from {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Cards initial state - hidden off screen */
+  .company-card.slide-left {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+
+  .company-card.slide-right {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+
+  .card-desc.slide-left-desc {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+
+  .card-desc.slide-right-desc {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+
+  /* Animated state when cards come into view */
+  .company-card.show-card {
+    animation: slideInFromRight 0.8s ease forwards;
+  }
+
+  .company-card.slide-right.show-card {
+    animation: slideInFromLeft 0.8s ease forwards;
+  }
+
+  .card-desc.slide-left-desc.show-desc {
+    animation: slideInFromLeft 0.8s ease forwards;
+  }
+
+  .card-desc.slide-right-desc.show-desc {
+    animation: slideInFromRight 0.8s ease forwards;
+  }
+
+  /* ── COMPANIES SECTION ── */
+  .companies-section {
+    min-height: 100vh;
+    padding: 100px 0 80px;
+    background: #000;
+  }
+
+  .companies-header {
+    text-align: center;
+    margin-bottom: 80px;
+    padding: 0 5%;
+  }
+
+  .companies-section-title {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #87ceeb, #1e90ff, #00008b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .companies-section-subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="companies-hero" id="hero">
+  <div class="companies-hero-background"></div>
+  <div class="companies-hero-overlay"></div>
+  
+  <div class="companies-hero-content">
+    <h1 class="companies-hero-title">Explore the Legends</h1>
+    <p class="companies-hero-description">
+      From the precision engineering of Germany to the raw power of Japan, from British heritage to Indian soul — 
+      discover the world's most iconic motorcycle manufacturers. Each brand tells a story of innovation, passion, 
+      and the relentless pursuit of riding perfection.
+    </p>
+    <p class="companies-hero-description">
+      Choose your legacy. Choose your legend.
+    </p>
+  </div>
+  
+  <a href="#companies" class="companies-scroll-prompt">
+    Browse Brands
+    <span class="companies-scroll-arrow">↓</span>
+  </a>
+</div>
+
+<!-- Companies Selection Section -->
+<div class="companies-section" id="companies">
+  <div class="companies-header">
+    <h2 class="companies-section-title">Select a Brand</h2>
+    <p class="companies-section-subtitle">Your journey begins here</p>
+  </div>
+
+  <div class="cards-section">
+    {% for company in companies %}
+      {% if loop.index % 2 == 1 %}
+        {# Odd rows: card on left, description on right #}
+        <div class="card-row">
+          <div class="company-card-wrapper" style="order:1">
+            <div class="company-card slide-left">
+              <img src="/static/logos/{{ company.name }}.jpg" class="company-img" alt="{{ company.name }}">
+              <div class="card-overlay"></div>
+              <div class="card-content">
+                <div class="card-header"></div>
+                <div class="card-bottom">
+                  <div class="card-tagline">{{ company.tagline if company.tagline else 'Explore our collection' }}</div>
+                  <a href="/categories/{{ company.id }}" class="card-btn">Explore &rarr;</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-desc slide-left-desc" style="order:2; text-align:left;">
+            <h3>{{ company.name }}</h3>
+            <p>{{ company.description if company.description else 'Discover the complete collection of motorcycles from this legendary manufacturer.' }}</p>
+          </div>
+        </div>
+      {% else %}
+        {# Even rows: description on left, card on right #}
+        <div class="card-row">
+          <div class="card-desc slide-right-desc" style="order:1; text-align:right;">
+            <h3>{{ company.name }}</h3>
+            <p>{{ company.description if company.description else 'Discover the complete collection of motorcycles from this legendary manufacturer.' }}</p>
+          </div>
+          <div class="company-card-wrapper" style="order:2">
+            <div class="company-card slide-right">
+              <img src="/static/logos/{{ company.name }}.jpg" class="company-img" alt="{{ company.name }}">
+              <div class="card-overlay"></div>
+              <div class="card-content">
+                <div class="card-header"></div>
+                <div class="card-bottom">
+                  <div class="card-tagline">{{ company.tagline if company.tagline else 'Explore our collection' }}</div>
+                  <a href="/categories/{{ company.id }}" class="card-btn">Explore &rarr;</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Smooth scroll for "Browse Brands" link
+  document.querySelector('.companies-scroll-prompt').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.querySelector('#companies').scrollIntoView({ 
+      behavior: 'smooth' 
+    });
+  });
+
+  // Animate company cards and descriptions on scroll
+  const cards = document.querySelectorAll('.company-card');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, index) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('show-card');
+          // Find sibling description
+          const row = entry.target.closest('.card-row');
+          if (row) {
+            const desc = row.querySelector('.card-desc');
+            if (desc) desc.classList.add('show-desc');
+          }
+        }, index * 150);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  cards.forEach(card => observer.observe(card));
+</script>
+{% endblock %}

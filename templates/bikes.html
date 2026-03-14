@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Motorcycles — MotoLib{% endblock %}
+
+{% block extra_styles %}
+<style>
+  /* ── BIKES SECTION ── */
+  .bikes-page {
+    min-height: 100vh;
+    padding: 120px 5% 80px;
+    background: #000;
+  }
+
+  .bikes-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  .bikes-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, #87ceeb, #1e90ff, #00008b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+  }
+
+  .bikes-subtitle {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* ── BIKES GRID ── */
+  .bikes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 40px;
+  }
+
+  .bike-card {
+    position: relative;
+    height: 450px;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #111;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .bike-card.show-card {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .bike-card:hover {
+    transform: translateY(-10px);
+    border-color: rgba(135, 206, 235, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .bike-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s ease;
+  }
+
+  .bike-card:hover .bike-card-image {
+    transform: scale(1.1);
+  }
+
+  /* Overlays */
+  .bike-card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+    z-index: 1;
+  }
+
+  .bike-card-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 30px;
+    z-index: 2;
+    transform: translateY(10px);
+    transition: transform 0.5s ease;
+  }
+
+  .bike-card:hover .bike-card-content {
+    transform: translateY(0);
+  }
+
+  .bike-card-brand {
+    font-size: 12px;
+    color: #87ceeb;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .bike-card-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 15px;
+    line-height: 1.2;
+  }
+
+  .bike-card-meta {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+    opacity: 0.7;
+    font-size: 14px;
+  }
+
+  .bike-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+  }
+
+  .bike-card-btn:hover {
+    background: #fff;
+    color: #000;
+    border-color: #fff;
+  }
+
+  /* Empty state */
+  .no-bikes {
+    text-align: center;
+    padding: 100px 20px;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .no-bikes-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .bikes-page {
+      padding: 100px 20px 60px;
+    }
+
+    .bikes-title {
+      font-size: 32px;
+    }
+
+    .bikes-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bike-card {
+      height: 400px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bikes-page">
+  <div class="bikes-header">
+    <h1 class="bikes-title">
+      {% if bikes and bikes[0].category_name %}
+        {{ bikes[0].category_name }}s
+      {% else %}
+        Motorcycles
+      {% endif %}
+    </h1>
+    <p class="bikes-subtitle">
+      {% if bikes and bikes[0].company_name %}
+        By {{ bikes[0].company_name }}
+      {% else %}
+        Explore our collection
+      {% endif %}
+    </p>
+  </div>
+
+  {% if bikes %}
+    <div class="bikes-grid">
+      {% for bike in bikes %}
+        <div class="bike-card" data-card-index="{{ loop.index0 }}">
+          <img src="{{ bike.image_url if bike.image_url else '/static/bikes/default.jpg' }}" 
+               class="bike-card-image" 
+               alt="{{ bike.name }}"
+               onerror="this.src='/static/bikes/default.jpg'">
+          
+          <div class="bike-card-overlay"></div>
+          
+          <div class="bike-card-content">
+            <div class="bike-card-brand">{{ bike.company_name }}</div>
+            <h3 class="bike-card-name">{{ bike.name }}</h3>
+            
+            <div class="bike-card-meta">
+              <span>{{ bike.year if bike.year else 'N/A' }}</span>
+              <span>•</span>
+              <span>{{ bike.category_name }}</span>
+            </div>
+            
+            <a href="/bike/{{ bike.id }}" class="bike-card-btn">
+              View Details <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="no-bikes">
+      <div class="no-bikes-icon">🏍️</div>
+      <h3>No motorcycles found</h3>
+      <p>Try adjusting your filters or explore other categories.</p>
+      <br>
+      <a href="/companies" class="bike-card-btn">Back to Brands</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Animate bike cards on scroll
+  const bikeCards = document.querySelectorAll('.bike-card');
+  const cardObserver = new IntersectionObserver(entries => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const index = entry.target.getAttribute('data-card-index');
+        setTimeout(() => {
+          entry.target.classList.add('show-card');
+        }, (index % 3) * 150); // Stagger based on column
+        cardObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  bikeCards.forEach(card => cardObserver.observe(card));
+</script>
+{% endblock %}

@@ -1,0 +1,983 @@
+{% extends "base.html" %}
+
+{% block title %}MotoLib — The Ultimate Motorcycle Encyclopedia{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .hero-background {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/static/hero-background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: 0;
+    transition: opacity 0.5s ease-out;
+  }
+
+  .hero-video-section {
+    position: relative;
+    min-height: 100vh;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #000;
+    padding-top: 80px;
+    padding-bottom: 40px;
+  }
+
+  /* Dark overlay for background image */
+  .hero-video-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 0;
+  }
+
+  /* Title ABOVE video */
+  .hero-title-container {
+    position: relative;
+    z-index: 4;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .hero-main-title {
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  /* Video container - smaller to fit with title */
+  .video-container {
+    position: relative;
+    width: 60vw;
+    aspect-ratio: 16 / 9;
+    max-height: 60vh;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  /* Video container - smaller to fit with title */
+  .video-container {
+    position: relative;
+    width: 60vw;
+    aspect-ratio: 16 / 9;
+    max-height: 60vh;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .hero-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: screen; /* Makes black pixels transparent */
+  }
+
+  .letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: letterDrop 0.5s ease forwards;
+  }
+
+  .letter.plain {
+    background: linear-gradient(135deg, #87ceeb, #1e90ff, #00008b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .letter.brand {
+    background: linear-gradient(90deg, #ff6b6b, #ee5a6f, #f06595, #cc5de8, #845ef7, #5c7cfa, #339af0, #22b8cf, #20c997, #51cf66, #94d82d, #ffd43b, #ff922b);
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: letterDrop 0.5s ease forwards, gradientShift 3s ease infinite;
+  }
+
+  @keyframes letterDrop {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 100% center; }
+  }
+
+  /* Content Section */
+  .content-section {
+    background: #000;
+    padding: 80px 5% 80px;
+    position: relative;
+  }
+
+  .about-container {
+    max-width: 1000px;
+    margin: 0 auto 80px;
+    text-align: center;
+  }
+
+  .about-title {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    background: linear-gradient(90deg, #87ceeb, #1e90ff, #00008b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+
+  .about-title.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .about-description {
+    font-size: 18px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 15px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+
+  .about-description.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Features grid - 2x2 with horizontal layout */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    max-width: 1200px;
+    margin: 60px auto 80px;
+  }
+
+  .feature-card {
+    background: linear-gradient(135deg, #0d1f35 0%, #0b0f14 100%);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 35px 30px;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    text-align: left;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.6s ease;
+  }
+
+  .feature-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(135, 206, 235, 0.3);
+    box-shadow: 0 15px 40px rgba(30, 144, 255, 0.2);
+  }
+
+  .feature-icon {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #87ceeb, #1e90ff);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+  }
+
+  .feature-content {
+    flex: 1;
+  }
+
+  .feature-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+
+  .feature-description {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* Statistics section - remove 4th stat */
+  .stats-section {
+    max-width: 1000px;
+    margin: 0 auto 80px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    text-align: center;
+  }
+
+  .stat-item {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.6s ease;
+  }
+
+  .stat-item.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .stat-number {
+    font-size: 48px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #87ceeb, #1e90ff, #00008b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* Journey section */
+  .journey-section {
+    max-width: 850px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .journey-title {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+
+  .journey-title.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .journey-description {
+    font-size: 16px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 25px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+
+  .journey-description.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .journey-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 45px;
+    background: linear-gradient(135deg, #87ceeb, #1e90ff, #00008b);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.4s ease;
+    opacity: 0;
+    transform: translateY(30px);
+    box-shadow: 0 10px 30px rgba(30, 144, 255, 0.3);
+  }
+
+  .journey-cta.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .journey-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(30, 144, 255, 0.5);
+  }
+
+  .journey-cta .arrow {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+  }
+
+  .journey-cta:hover .arrow {
+    transform: translateX(5px);
+  }
+
+  @media (max-width: 768px) {
+    .video-container {
+      width: 85vw;
+    }
+    .hero-main-title {
+      font-size: 32px;
+    }
+    .about-title {
+      font-size: 28px;
+    }
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+    .stats-section {
+      grid-template-columns: 1fr;
+    }
+    .journey-title {
+      font-size: 26px;
+    }
+    .stat-number {
+      font-size: 36px;
+    }
+  }
+  .letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: letterDrop 0.5s ease forwards;
+  }
+
+  .letter.plain {
+    background: linear-gradient(135deg, #87ceeb, #1e90ff, #00008b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+
+  .letter.brand {
+    background: linear-gradient(90deg, #ff6b6b, #ee5a6f, #f06595, #cc5de8, #845ef7, #5c7cfa, #339af0, #22b8cf, #20c997, #51cf66, #94d82d, #ffd43b, #ff922b);
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: letterDrop 0.5s ease forwards, gradientShift 3s ease infinite;
+  }
+
+  @keyframes letterDrop {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 100% center; }
+  }
+
+  .hero-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, #87ceeb, #1e90ff, #00008b);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.4s ease;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease 1.5s forwards;
+    box-shadow: 0 10px 30px rgba(30, 144, 255, 0.3);
+  }
+
+  .hero-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(30, 144, 255, 0.5);
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .scroll-indicator {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    color: rgba(255,255,255,0.6);
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeInBounce 1s ease 2s forwards;
+  }
+
+  @keyframes fadeInBounce {
+    to { opacity: 1; }
+  }
+
+  .scroll-arrow {
+    display: block;
+    margin-top: 8px;
+    font-size: 16px;
+    animation: bounce 2s infinite;
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
+  }
+
+  /* Content Section Styles */
+  .content-section {
+    background: #000;
+    padding: 120px 5% 100px;
+    position: relative;
+  }
+
+  .about-container {
+    max-width: 1200px;
+    margin: 0 auto 120px;
+    text-align: center;
+  }
+
+  .about-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    background: linear-gradient(90deg, #87ceeb, #1e90ff, #00008b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+
+  .about-title.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .about-description {
+    font-size: 20px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+
+  .about-description.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Forces exactly 2 cards per row */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* This ensures only 2 fit per row */
+  gap: 40px;
+  max-width: 1200px;
+  margin: 80px auto 120px;
+}
+
+/* Increased size for the cards */
+.feature-card {
+  background: linear-gradient(135deg, #0d1f35 0%, #0b0f14 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px; /* Slightly rounder for the larger size */
+  padding: 60px 40px;  /* Increased padding to make the cards physically larger */
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: all 0.6s ease;
+}
+
+/* Make icons and text scale with the larger card */
+  .feature-icon {
+   width: 90px;         /* Increased from 70px/80px */
+   height: 90px;
+   flex-shrink: 0;
+   background: linear-gradient(135deg, #87ceeb, #1e90ff);
+   border-radius: 50%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 40px;     /* Larger emoji/icon */
+  }
+
+  .feature-title {
+   font-size: 26px;     /* Larger heading */
+   font-weight: 600;
+   color: #fff;
+   margin-bottom: 15px;
+  }
+
+  .feature-description {
+   font-size: 16px;     /* Larger body text */
+   line-height: 1.7;
+   color: rgba(255,255,255,0.6);
+  }
+
+  .stats-section {
+    max-width: 1200px;
+    margin: 0 auto 100px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 50px;
+    text-align: center;
+  }
+
+  .stat-item {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.6s ease;
+  }
+
+  .stat-item.visible {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .stat-number {
+    font-size: 56px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #87ceeb, #1e90ff, #00008b);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+  }
+
+  .journey-section {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .journey-title {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #fff;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+
+  .journey-title.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .journey-description {
+    font-size: 18px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 40px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s ease;
+  }
+
+  .journey-description.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .journey-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 50px;
+    background: linear-gradient(135deg, #87ceeb, #1e90ff, #00008b);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.4s ease;
+    opacity: 0;
+    transform: translateY(30px);
+    box-shadow: 0 10px 30px rgba(30, 144, 255, 0.3);
+  }
+
+  .journey-cta.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .journey-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(30, 144, 255, 0.5);
+  }
+
+  .journey-cta .arrow {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  .journey-cta:hover .arrow {
+    transform: translateX(5px);
+  }
+
+  @media (max-width: 768px) {
+    .video-container {
+      width: 90vw;
+    }
+    .hero-main-title {
+      font-size: 36px;
+    }
+    .about-title {
+      font-size: 32px;
+    }
+    .journey-title {
+      font-size: 28px;
+    }
+    .stat-number {
+      font-size: 42px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-video-section" id="hero">
+  <div class="hero-background" id="heroBackground"></div>
+  <!-- Title ABOVE video -->
+  <div class="hero-title-container">
+    <h1 class="hero-main-title" id="mainTitle"></h1>
+  </div>
+
+  <!-- Video Container -->
+  <div class="video-container" id="videoContainer">
+    <!-- Single video + overlays will be created by JavaScript -->
+  </div>
+</div>
+
+<!-- Content Section -->
+<div class="content-section">
+  <!-- About MotoLib -->
+  <div class="about-container">
+    <h2 class="about-title" data-scroll-reveal>The Ultimate Motorcycle Encyclopedia</h2>
+    <p class="about-description" data-scroll-reveal data-delay="100">
+      MotoLib is your gateway to the world's most legendary motorcycle manufacturers. 
+      Dive deep into decades of engineering excellence, iconic designs, and the machines 
+      that defined generations of riders.
+    </p>
+    <p class="about-description" data-scroll-reveal data-delay="200">
+      From the precision of German engineering to the raw power of Japanese innovation, 
+      from British heritage to Indian soul — explore the brands that turned metal and 
+      gasoline into pure freedom.
+    </p>
+  </div>
+
+  <!-- Features Grid -->
+  <div class="features-grid">
+    <div class="feature-card" data-scroll-reveal data-delay="0">
+      <div class="feature-icon">🏍️</div>
+      <div class="feature-content">
+        <h3 class="feature-title">Legendary Brands</h3>
+        <p class="feature-description">
+          Explore BMW, Kawasaki, Royal Enfield, Triumph, Yamaha, and more. 
+          Each with their unique heritage and engineering philosophy.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-card" data-scroll-reveal data-delay="100">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-content">
+        <h3 class="feature-title">Every Category</h3>
+        <p class="feature-description">
+          Sport bikes, cruisers, bobbers, adventure bikes, cafe racers, and naked bikes. 
+          Find the perfect machine for your riding style.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-card" data-scroll-reveal data-delay="200">
+      <div class="feature-icon">📊</div>
+      <div class="feature-content">
+        <h3 class="feature-title">Detailed Information</h3>
+        <p class="feature-description">
+          Comprehensive specs, heritage stories, and direct links to official sources. 
+          Everything you need to make informed decisions.
+        </p>
+      </div>
+    </div>
+
+    <div class="feature-card" data-scroll-reveal data-delay="300">
+      <div class="feature-icon">✨</div>
+      <div class="feature-content">
+        <h3 class="feature-title">Curated Collection</h3>
+        <p class="feature-description">
+          Handpicked models representing the pinnacle of motorcycle design and performance. 
+          From classics to cutting-edge modern machines.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="stats-section">
+    <div class="stat-item" data-scroll-reveal data-delay="0">
+      <div class="stat-number" data-count="5">0</div>
+      <div class="stat-label">Legendary Brands</div>
+    </div>
+
+    <div class="stat-item" data-scroll-reveal data-delay="100">
+      <div class="stat-number" data-count="6">0</div>
+      <div class="stat-label">Categories</div>
+    </div>
+
+    <div class="stat-item" data-scroll-reveal data-delay="200">
+      <div class="stat-number" data-count="100">0</div>
+      <div class="stat-label">Iconic Models</div>
+    </div>
+  </div>
+
+  <!-- Journey Section -->
+  <div class="journey-section">
+    <h2 class="journey-title" data-scroll-reveal>Your Journey Starts Here</h2>
+    <p class="journey-description" data-scroll-reveal data-delay="100">
+      Whether you're a seasoned rider researching your next dream machine, a newcomer 
+      discovering the world of motorcycles, or an enthusiast celebrating the art of 
+      two-wheeled engineering — MotoLib is your companion.
+    </p>
+    <p class="journey-description" data-scroll-reveal data-delay="200">
+      Browse by brand to explore their legacy. Filter by category to find your style. 
+      Discover the stories behind the machines that move us.
+    </p>
+    <a href="/companies" class="journey-cta" data-scroll-reveal data-delay="300">
+      Begin Your Journey <span class="arrow">→</span>
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const videoContainer = document.getElementById('videoContainer');
+  let windowsRevealed = false;
+  let animating = false;
+
+  // User's requested gaps: 3.5%, 5%, 2%, 3%, 4%, 2%
+  // Total gaps = 3.5 + 5 + 2 + 3 + 4 + 2 = 19.5%
+  // Total space left for 7 windows = 100% - 19.5% = 80.5%
+  // 80.5% / 7 windows = 11.5% per window
+  
+  const windowConfig = [
+    [0, 11.5, 'top'],                        // Window 1: 0 to 11.5
+    [15.0, 11.5, 'bottom'],                  // Window 2: (11.5 + 3.5 gap) = 15.0 to 26.5
+    [31.5, 11.5, 'top'],                     // Window 3: (26.5 + 5 gap) = 31.5 to 43.0
+    [45.0, 11.5, 'bottom'],                  // Window 4: (43.0 + 2 gap) = 45.0 to 56.5
+    [59.5, 11.5, 'top'],                     // Window 5: (56.5 + 3 gap) = 59.5 to 71.0
+    [75.0, 11.5, 'bottom'],                  // Window 6: (71.0 + 4 gap) = 75.0 to 86.5
+    [88.5, 11.5, 'top']                      // Window 7: (86.5 + 2 gap) = 88.5 to 100.0
+  ];
+
+  // Create SINGLE video
+  const video = document.createElement('video');
+  video.className = 'hero-video';
+  video.src = '/static/video/bike.mp4';
+  video.autoplay = true;
+  video.muted = true;
+  video.loop = true;
+  video.playsInline = true;
+  videoContainer.appendChild(video);
+
+  // Set up 7 distinct mask rectangles to perfectly cut out the video
+  const maskImages = [];
+  const maskPositions = [];
+  const maskSizesInitial = [];
+  const maskSizesRevealed = [];
+
+  windowConfig.forEach(([left, width, direction]) => {
+    maskImages.push(`linear-gradient(#000, #000)`);
+    
+    // In original, direction 'top' -> 20% black overlay at top, video shown at bottom 80%.
+    // So the video "cutout" should touch the bottom.
+    if (direction === 'top') {
+      maskPositions.push(`${left}% 100%`);
+    } else {
+      maskPositions.push(`${left}% 0%`);
+    }
+    
+    maskSizesInitial.push(`${width}% 0%`); // start completely hidden
+    maskSizesRevealed.push(`${width}% 80%`); // reveal 80% of video max
+  });
+
+  video.style.webkitMaskImage = maskImages.join(', ');
+  video.style.maskImage = maskImages.join(', ');
+  
+  video.style.webkitMaskPosition = maskPositions.join(', ');
+  video.style.maskPosition = maskPositions.join(', ');
+
+  video.style.webkitMaskRepeat = 'no-repeat';
+  video.style.maskRepeat = 'no-repeat';
+
+  let currentSizes = [...maskSizesInitial];
+  video.style.webkitMaskSize = currentSizes.join(', ');
+  video.style.maskSize = currentSizes.join(', ');
+
+  video.style.transition = '-webkit-mask-size 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), mask-size 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+
+  async function revealWindows() {
+    if (animating) return;
+    animating = true;
+    windowsRevealed = true;
+
+    for (let i = 0; i < windowConfig.length; i++) {
+        currentSizes[i] = maskSizesRevealed[i];
+        video.style.webkitMaskSize = currentSizes.join(', ');
+        video.style.maskSize = currentSizes.join(', ');
+        await new Promise(r => setTimeout(r, 150));
+    }
+    await new Promise(r => setTimeout(r, 800)); // wait for final transition to finish
+    animating = false;
+  }
+
+  async function concealWindows() {
+    if (animating) return;
+    animating = true;
+    windowsRevealed = false;
+
+    for (let i = windowConfig.length - 1; i >= 0; i--) {
+        currentSizes[i] = maskSizesInitial[i];
+        video.style.webkitMaskSize = currentSizes.join(', ');
+        video.style.maskSize = currentSizes.join(', ');
+        await new Promise(r => setTimeout(r, 150));
+    }
+    await new Promise(r => setTimeout(r, 800)); // wait for final transition to finish
+    animating = false;
+  }
+
+  setTimeout(() => revealWindows(), 500);
+
+  // Scroll detection
+  const heroBackground = document.getElementById('heroBackground');
+  
+  window.addEventListener('scroll', () => {
+    // Video Blinds Animation Logic
+    const threshold = window.innerHeight * 0.6;
+    if (window.scrollY > threshold && windowsRevealed) {
+      concealWindows();
+    } else if (window.scrollY < threshold && !windowsRevealed && !animating) {
+      setTimeout(() => revealWindows(), 100);
+    }
+    
+    // Background Image Fade-Out Logic
+    if (window.scrollY > 50) {
+      heroBackground.style.opacity = '0';
+    } else {
+      heroBackground.style.opacity = '1';
+    }
+  });
+
+  // Title animation - just "MotoLib"
+  const titleText = "MotoLib";
+  const titleElement = document.getElementById('mainTitle');
+  titleText.split('').forEach((char, index) => {
+    const span = document.createElement('span');
+    // All letters get the brand gradient
+    span.className = 'letter brand';
+    span.textContent = char === ' ' ? '\u00A0' : char;
+    span.style.animationDelay = `${index * 0.05}s`;
+    titleElement.appendChild(span);
+  });
+
+  // Scroll reveal animations
+  const revealElements = document.querySelectorAll('[data-scroll-reveal]');
+  
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = entry.target.dataset.delay || 0;
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+          
+          // Counter animation for stats
+          if (entry.target.querySelector('[data-count]')) {
+            const numberElement = entry.target.querySelector('[data-count]');
+            const target = parseInt(numberElement.dataset.count);
+            animateCounter(numberElement, target);
+          }
+        }, delay);
+        
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  revealElements.forEach(el => revealObserver.observe(el));
+
+  // Counter animation
+  function animateCounter(element, target) {
+    let current = 0;
+    const increment = target / 60;
+    const duration = 2000;
+    const stepTime = duration / 60;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        element.textContent = target + '+';
+        clearInterval(timer);
+      } else {
+        element.textContent = Math.floor(current);
+      }
+    }, stepTime);
+  }
+</script>
+{% endblock %}

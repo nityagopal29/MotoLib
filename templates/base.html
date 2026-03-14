@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MotoLib{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #000;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /*                        NAVBAR                               */
+    /* ═══════════════════════════════════════════════════════════ */
+    
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: transparent;
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+    }
+
+    .navbar-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 40px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Logo - Original Style */
+    .navbar-logo {
+      font-size: 28px;
+      font-weight: 700;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      background: linear-gradient(90deg, #ff6b6b, #ee5a6f, #f06595, #cc5de8, #845ef7, #5c7cfa);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      background-size: 300% auto;
+      animation: gradientShift 4s linear infinite;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% center; }
+      100% { background-position: 300% center; }
+    }
+
+    /* Nav Buttons Container */
+    .nav-buttons {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    /* Nav Button Style */
+    .nav-btn {
+      position: relative;
+      padding: 10px 20px;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .nav-btn:hover {
+      color: #fff;
+    }
+
+    .nav-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) scaleX(0);
+      width: 80%;
+      height: 2px;
+      background: linear-gradient(90deg, #87ceeb, #1e90ff);
+      transition: transform 0.3s ease;
+    }
+
+    .nav-btn:hover::after,
+    .nav-btn.active::after {
+      transform: translateX(-50%) scaleX(1);
+    }
+
+    /* Lucky Star Button */
+    .lucky-star-container {
+      position: relative;
+    }
+
+    .lucky-star-btn {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a6f, #f06595, #cc5de8, #845ef7);
+      background-size: 200% 200%;
+      animation: gradientRotate 3s ease infinite;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    @keyframes gradientRotate {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .lucky-star-btn:hover {
+      transform: scale(1.1) rotate(15deg);
+      box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);
+    }
+
+    .lucky-star-btn .star-icon {
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+      animation: starPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes starPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+
+    /* Lucky Star Tooltip */
+    .lucky-tooltip {
+      position: absolute;
+      top: 70px;
+      right: 0;
+      background: rgba(0, 0, 0, 0.95);
+      padding: 12px 20px;
+      border-radius: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .lucky-star-btn:hover ~ .lucky-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .lucky-tooltip-text {
+      font-size: 14px;
+      font-weight: 600;
+      background: linear-gradient(90deg, #ff6b6b, #f06595, #cc5de8, #845ef7, #5c7cfa, #339af0);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      background-size: 200% auto;
+      animation: waveText 2s linear infinite;
+    }
+
+    @keyframes waveText {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /*                   DROPDOWN PANELS (BROWSE & FILTER)         */
+    /* ═══════════════════════════════════════════════════════════ */
+    
+    .dropdown-panel {
+      position: fixed;
+      top: 80px;
+      left: 0;
+      right: 0;
+      background: rgba(40, 40, 40, 0.4);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      z-index: 999;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    }
+
+    .dropdown-panel.open {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .dropdown-content {
+      padding: 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Browse Panel - 2 columns */
+    .browse-grid {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 60px;
+    }
+
+    /* Filter Panel - Tabs + Content */
+    .filter-container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+
+    .filter-tab {
+      padding: 10px 20px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: rgba(245, 245, 245, 0.7);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .filter-tab.active {
+      background: rgba(135, 206, 235, 0.15);
+      border-color: rgba(135, 206, 235, 0.5);
+      color: #87ceeb;
+    }
+
+    .filter-tab:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.05);
+      color: #f5f5f5;
+    }
+
+    .filter-tab .tab-close {
+      margin-left: 5px;
+      font-weight: 700;
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+
+    .filter-tab .tab-close:hover {
+      opacity: 1;
+      color: #ff6b6b;
+    }
+
+    .add-filter-btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #87ceeb, #1e90ff);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .add-filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(135, 206, 235, 0.4);
+    }
+
+    /* Filter Panel Grid */
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+    }
+
+    /* Column Styling */
+    .dropdown-column {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .dropdown-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(245, 245, 245, 0.5);
+      margin-bottom: 12px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .dropdown-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* Bikes Sub-columns */
+    .bikes-subgrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    /* Dropdown Item */
+    .dropdown-item {
+      color: rgba(245, 245, 245, 0.85);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 400;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      position: relative;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dropdown-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      transform: translateX(4px);
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Subtle white glint on hover */
+    .dropdown-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: 6px;
+      pointer-events: none;
+    }
+
+    .dropdown-item:hover::before {
+      opacity: 1;
+      animation: glintSweep 0.6s ease;
+    }
+
+    @keyframes glintSweep {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Filter Item States */
+    .dropdown-item.selected {
+      background: rgba(135, 206, 235, 0.1);
+      color: #87ceeb;
+    }
+
+    .dropdown-item.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    /* Tick Mark */
+    .tick-mark {
+      color: #51cf66;
+      font-weight: 700;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.3s ease;
+    }
+
+    .dropdown-item.selected .tick-mark {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Apply Button */
+    .apply-btn-container {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .apply-filter-btn {
+      padding: 14px 40px;
+      background: linear-gradient(135deg, #87ceeb, #1e90ff, #00008b);
+      border: none;
+      border-radius: 50px;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(30, 144, 255, 0.3);
+    }
+
+    .apply-filter-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(30, 144, 255, 0.5);
+    }
+
+    /* Tooltips for Browse/Filter */
+    .nav-btn-container {
+      position: relative;
+    }
+
+    .nav-tooltip {
+      position: absolute;
+      bottom: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.9);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .nav-btn:hover + .nav-tooltip {
+      opacity: 1;
+    }
+
+    /* ═══════════════════════════════════════════════════════════ */
+    /*                      SCROLL BEHAVIOR                        */
+    /* ═══════════════════════════════════════════════════════════ */
+    
+    .content {
+      padding-top: 80px;
+    }
+
+    
+  </style>
+  {% block extra_styles %}{% endblock %}
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <!-- Logo -->
+      <a href="/" class="navbar-logo">MotoLib</a>
+
+      <!-- Nav Buttons -->
+      <div class="nav-buttons">
+        <!-- Browse Button -->
+        <div class="nav-btn-container">
+          <button class="nav-btn" id="browseBtn">Browse</button>
+          <div class="nav-tooltip">Quick access to all bikes</div>
+        </div>
+
+        <!-- Filter Button -->
+        <div class="nav-btn-container">
+          <button class="nav-btn" id="filterBtn">Filter</button>
+          <div class="nav-tooltip">Discover bikes by preferences</div>
+        </div>
+
+        <!-- Lucky Star Button -->
+        <div class="lucky-star-container">
+          <button class="lucky-star-btn" id="luckyBtn">
+            <span class="star-icon">⭐</span>
+          </button>
+          <div class="lucky-tooltip">
+            <span class="lucky-tooltip-text">⭐ I'm feeling lucky ⭐</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Browse Dropdown Panel -->
+  <div class="dropdown-panel" id="browsePanel">
+    <div class="dropdown-content">
+      <div class="browse-grid">
+        <!-- Column 1: Brands -->
+        <div class="dropdown-column">
+          <div class="dropdown-title">Brands</div>
+          <div class="dropdown-list" id="browseBrandsList">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Column 2: Motorcycles (2 sub-columns) -->
+        <div class="dropdown-column">
+          <div class="dropdown-title">Motorcycles</div>
+          <div class="bikes-subgrid" id="browseMotorcyclesList">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Dropdown Panel -->
+  <div class="dropdown-panel" id="filterPanel">
+    <div class="dropdown-content">
+      <div class="filter-container">
+        <!-- Filter Tabs -->
+        <div class="filter-tabs" id="filterTabs">
+          <div class="filter-tab active" data-filter-id="1">
+            <span>Filter 1</span>
+            <span class="tab-close" onclick="removeFilter(1)">×</span>
+          </div>
+          <button class="add-filter-btn" onclick="addNewFilter()">+ Add New Filter</button>
+        </div>
+
+        <!-- Filter Content -->
+        <div id="filterContent">
+          <!-- Active filter panel content -->
+          <div class="filter-panel-content" data-filter-id="1">
+            <div class="filter-grid">
+              <!-- Brands Column -->
+              <div class="dropdown-column">
+                <div class="dropdown-title">Brands</div>
+                <div class="dropdown-list" id="filterBrandsList-1">
+                  <!-- Populated by JavaScript -->
+                </div>
+              </div>
+
+              <!-- Categories Column -->
+              <div class="dropdown-column">
+                <div class="dropdown-title">Categories</div>
+                <div class="dropdown-list" id="filterCategoriesList-1">
+                  <!-- Populated by JavaScript -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Apply Button -->
+            <div class="apply-btn-container">
+              <button class="apply-filter-btn" onclick="applyFilter()">Apply Filter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+
+  <!-- Base JavaScript -->
+  <script>
+    
+    // ═══════════════════════════════════════════════════════════
+    //                    PANEL TOGGLE LOGIC
+    // ═══════════════════════════════════════════════════════════
+    
+    const browseBtn = document.getElementById('browseBtn');
+    const filterBtn = document.getElementById('filterBtn');
+    const browsePanel = document.getElementById('browsePanel');
+    const filterPanel = document.getElementById('filterPanel');
+
+    function closeAllPanels() {
+      browsePanel.classList.remove('open');
+      filterPanel.classList.remove('open');
+      browseBtn.classList.remove('active');
+      filterBtn.classList.remove('active');
+    }
+
+    browseBtn.addEventListener('click', () => {
+      if (browsePanel.classList.contains('open')) {
+        closeAllPanels();
+      } else {
+        closeAllPanels();
+        browsePanel.classList.add('open');
+        browseBtn.classList.add('active');
+        loadBrowseData();
+      }
+    });
+
+    filterBtn.addEventListener('click', () => {
+      if (filterPanel.classList.contains('open')) {
+        closeAllPanels();
+      } else {
+        closeAllPanels();
+        filterPanel.classList.add('open');
+        filterBtn.classList.add('active');
+        loadFilterData();
+      }
+    });
+
+    // Close panels when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.navbar') && !e.target.closest('.dropdown-panel')) {
+        closeAllPanels();
+      }
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    //                    LUCKY STAR BUTTON
+    // ═══════════════════════════════════════════════════════════
+    
+    document.getElementById('luckyBtn').addEventListener('click', () => {
+      window.location.href = '/random-bike';
+    });
+
+    // ═══════════════════════════════════════════════════════════
+    //                    BROWSE PANEL DATA LOADING
+    // ═══════════════════════════════════════════════════════════
+    
+    async function loadBrowseData() {
+      try {
+        // Fetch brands and bikes
+        const response = await fetch('/api/browse-data');
+        const data = await response.json();
+
+        // Populate brands
+        const brandsList = document.getElementById('browseBrandsList');
+        brandsList.innerHTML = data.brands.map(brand => `
+          <a href="/categories/${brand.id}" class="dropdown-item">
+            ${brand.name}
+          </a>
+        `).join('');
+
+        // Populate motorcycles (split into 2 columns)
+        const motorcyclesList = document.getElementById('browseMotorcyclesList');
+        const half = Math.ceil(data.bikes.length / 2);
+        const column1 = data.bikes.slice(0, half);
+        const column2 = data.bikes.slice(half);
+
+        motorcyclesList.innerHTML = `
+          <div class="dropdown-list">
+            ${column1.map(bike => `
+              <a href="/bike/${bike.id}" class="dropdown-item">
+                ${bike.company_name} ${bike.name}
+              </a>
+            `).join('')}
+          </div>
+          <div class="dropdown-list">
+            ${column2.map(bike => `
+              <a href="/bike/${bike.id}" class="dropdown-item">
+                ${bike.company_name} ${bike.name}
+              </a>
+            `).join('')}
+          </div>
+        `;
+      } catch (error) {
+        console.error('Error loading browse data:', error);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //                  FILTER PANEL - MULTI-FILTER LOGIC
+    // ═══════════════════════════════════════════════════════════
+    
+    let filterCount = 1;
+    let activeFilterId = 1;
+    let filterStates = {
+      1: {
+        selectedBrands: [],
+        selectedCategories: [],
+        availableBrands: [],
+        availableCategories: []
+      }
+    };
+
+    async function loadFilterData() {
+      try {
+        // Fetch brands and categories
+        const response = await fetch('/api/filter-data');
+        const data = await response.json();
+
+        filterStates[activeFilterId].availableBrands = data.brands;
+        filterStates[activeFilterId].availableCategories = data.categories;
+
+        renderFilterPanel(activeFilterId);
+      } catch (error) {
+        console.error('Error loading filter data:', error);
+      }
+    }
+
+    function renderFilterPanel(filterId) {
+      const state = filterStates[filterId];
+      
+      // Render brands
+      const brandsList = document.getElementById(`filterBrandsList-${filterId}`);
+      brandsList.innerHTML = state.availableBrands.map(brand => {
+        const isSelected = state.selectedBrands.includes(brand.id);
+        const isDisabled = checkIfBrandDisabled(filterId, brand.id);
+        
+        return `
+          <div class="dropdown-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}" 
+               onclick="toggleBrand(${filterId}, ${brand.id})">
+            <span>${brand.name}</span>
+            <span class="tick-mark">✓</span>
+          </div>
+        `;
+      }).join('');
+
+      // Render categories
+      const categoriesList = document.getElementById(`filterCategoriesList-${filterId}`);
+      categoriesList.innerHTML = state.availableCategories.map(category => {
+        const isSelected = state.selectedCategories.includes(category.id);
+        const isDisabled = checkIfCategoryDisabled(filterId, category.id);
+        
+        return `
+          <div class="dropdown-item ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}" 
+               onclick="toggleCategory(${filterId}, ${category.id})">
+            <span>${category.name}</span>
+            <span class="tick-mark">✓</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleBrand(filterId, brandId) {
+      const state = filterStates[filterId];
+      const index = state.selectedBrands.indexOf(brandId);
+      
+      if (index > -1) {
+        state.selectedBrands.splice(index, 1);
+      } else {
+        state.selectedBrands.push(brandId);
+      }
+      
+      updateFilterState(filterId);
+    }
+
+    function toggleCategory(filterId, categoryId) {
+      const state = filterStates[filterId];
+      const index = state.selectedCategories.indexOf(categoryId);
+      
+      if (index > -1) {
+        state.selectedCategories.splice(index, 1);
+      } else {
+        state.selectedCategories.push(categoryId);
+      }
+      
+      updateFilterState(filterId);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //          FILTER LOGIC - ALL 8 CASES IMPLEMENTATION
+    // ═══════════════════════════════════════════════════════════
+    
+    async function updateFilterState(filterId) {
+      const state = filterStates[filterId];
+      
+      // Fetch bike-brand-category mapping
+      const response = await fetch('/api/bike-mappings');
+      const mappings = await response.json();
+      
+      // Apply filter cases
+      if (state.selectedBrands.length > 0 && state.selectedCategories.length === 0) {
+        // Case 1 or Case 3
+        handleBrandsOnlySelected(filterId, mappings);
+      } else if (state.selectedCategories.length > 0 && state.selectedBrands.length === 0) {
+        // Case 2 or Case 4
+        handleCategoriesOnlySelected(filterId, mappings);
+      } else if (state.selectedBrands.length > 0 && state.selectedCategories.length > 0) {
+        // Cases 5, 6, 7, 8
+        handleBothSelected(filterId, mappings);
+      } else {
+        // Reset to all available
+        resetFilters(filterId);
+      }
+      
+      renderFilterPanel(filterId);
+    }
+
+    function handleBrandsOnlySelected(filterId, mappings) {
+      const state = filterStates[filterId];
+      
+      // Get union of categories from selected brands
+      const availableCategories = new Set();
+      mappings.forEach(m => {
+        if (state.selectedBrands.includes(m.company_id)) {
+          availableCategories.add(m.category_id);
+        }
+      });
+      
+      // Make only these categories selectable
+      state.availableCategories.forEach(cat => {
+        cat.disabled = !availableCategories.has(cat.id);
+      });
+    }
+
+    function handleCategoriesOnlySelected(filterId, mappings) {
+      const state = filterStates[filterId];
+      
+      // Get union of brands from selected categories
+      const availableBrands = new Set();
+      mappings.forEach(m => {
+        if (state.selectedCategories.includes(m.category_id)) {
+          availableBrands.add(m.company_id);
+        }
+      });
+      
+      // Make only these brands selectable
+      state.availableBrands.forEach(brand => {
+        brand.disabled = !availableBrands.has(brand.id);
+      });
+    }
+
+    function handleBothSelected(filterId, mappings) {
+      const state = filterStates[filterId];
+      
+      if (state.selectedBrands.length > 1 && state.selectedCategories.length === 1) {
+        // Case 5/7: Multiple brands, one category
+        const categoryId = state.selectedCategories[0];
+        
+        // Check which brands have this category
+        const brandsWithCategory = new Set();
+        mappings.forEach(m => {
+          if (m.category_id === categoryId) {
+            brandsWithCategory.add(m.company_id);
+          }
+        });
+        
+        // Disable/unselect brands that don't have this category (Case 7)
+        state.selectedBrands = state.selectedBrands.filter(brandId => {
+          const hasCategory = brandsWithCategory.has(brandId);
+          if (!hasCategory) {
+            const brand = state.availableBrands.find(b => b.id === brandId);
+            if (brand) brand.disabled = true;
+          }
+          return hasCategory;
+        });
+        
+      } else if (state.selectedCategories.length > 1 && state.selectedBrands.length === 1) {
+        // Case 6/8: Multiple categories, one brand
+        const brandId = state.selectedBrands[0];
+        
+        // Check which categories this brand has
+        const categoriesWithBrand = new Set();
+        mappings.forEach(m => {
+          if (m.company_id === brandId) {
+            categoriesWithBrand.add(m.category_id);
+          }
+        });
+        
+        // Disable/unselect categories that brand doesn't have (Case 8)
+        state.selectedCategories = state.selectedCategories.filter(catId => {
+          const hasBrand = categoriesWithBrand.has(catId);
+          if (!hasBrand) {
+            const cat = state.availableCategories.find(c => c.id === catId);
+            if (cat) cat.disabled = true;
+          }
+          return hasBrand;
+        });
+      }
+    }
+
+    function checkIfBrandDisabled(filterId, brandId) {
+      const brand = filterStates[filterId].availableBrands.find(b => b.id === brandId);
+      return brand && brand.disabled;
+    }
+
+    function checkIfCategoryDisabled(filterId, categoryId) {
+      const cat = filterStates[filterId].availableCategories.find(c => c.id === categoryId);
+      return cat && cat.disabled;
+    }
+
+    function resetFilters(filterId) {
+      const state = filterStates[filterId];
+      state.availableBrands.forEach(b => b.disabled = false);
+      state.availableCategories.forEach(c => c.disabled = false);
+    }
+
+    function addNewFilter() {
+      filterCount++;
+      activeFilterId = filterCount;
+      
+      filterStates[filterCount] = {
+        selectedBrands: [],
+        selectedCategories: [],
+        availableBrands: [],
+        availableCategories: []
+      };
+      
+      // Add tab
+      const tabs = document.getElementById('filterTabs');
+      const addBtn = tabs.querySelector('.add-filter-btn');
+      const newTab = document.createElement('div');
+      newTab.className = 'filter-tab active';
+      newTab.dataset.filterId = filterCount;
+      newTab.innerHTML = `
+        <span>Filter ${filterCount}</span>
+        <span class="tab-close" onclick="removeFilter(${filterCount})">×</span>
+      `;
+      tabs.insertBefore(newTab, addBtn);
+      
+      // Deactivate other tabs
+      tabs.querySelectorAll('.filter-tab').forEach(tab => {
+        if (tab.dataset.filterId != filterCount) {
+          tab.classList.remove('active');
+        }
+      });
+      
+      // Add filter panel content
+      const content = document.getElementById('filterContent');
+      content.innerHTML = `
+        <div class="filter-panel-content" data-filter-id="${filterCount}">
+          <div class="filter-grid">
+            <div class="dropdown-column">
+              <div class="dropdown-title">Brands</div>
+              <div class="dropdown-list" id="filterBrandsList-${filterCount}"></div>
+            </div>
+            <div class="dropdown-column">
+              <div class="dropdown-title">Categories</div>
+              <div class="dropdown-list" id="filterCategoriesList-${filterCount}"></div>
+            </div>
+          </div>
+          <div class="apply-btn-container">
+            <button class="apply-filter-btn" onclick="applyFilter()">Apply Filter</button>
+          </div>
+        </div>
+      `;
+      
+      loadFilterData();
+    }
+
+    function removeFilter(filterId) {
+      if (Object.keys(filterStates).length === 1) return; // Keep at least one filter
+      
+      delete filterStates[filterId];
+      document.querySelector(`.filter-tab[data-filter-id="${filterId}"]`).remove();
+      
+      // Activate first remaining filter
+      const remainingTabs = document.querySelectorAll('.filter-tab');
+      if (remainingTabs.length > 0) {
+        activeFilterId = parseInt(remainingTabs[0].dataset.filterId);
+        remainingTabs[0].classList.add('active');
+        loadFilterData();
+      }
+    }
+
+    function applyFilter() {
+      // Collect all filter states
+      const allBrands = [];
+      const allCategories = [];
+      
+      Object.values(filterStates).forEach(state => {
+        allBrands.push(...state.selectedBrands);
+        allCategories.push(...state.selectedCategories);
+      });
+      
+      // Build query string
+      const params = new URLSearchParams();
+      if (allBrands.length) params.append('brands', allBrands.join(','));
+      if (allCategories.length) params.append('categories', allCategories.join(','));
+      
+      // Redirect to filter results
+      window.location.href = `/filter-results?${params.toString()}`;
+    }
+
+    
+  </script>
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}{{ bike.company_name }} {{ bike.bike_name }} — MotoLib{% endblock %}
+
+{% block extra_styles %}
+<style>
+  /* Full-screen bike detail page */
+  .bike-detail-page {
+    position: relative;
+    min-height: 100vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    padding: 100px 60px 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Content wrapper */
+  .bike-content {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+  }
+
+  /* Bike title - top left */
+  .bike-full-name {
+    font-size: 56px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 25px;
+    line-height: 1.2;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: slideInLeft 0.8s ease forwards;
+  }
+
+  @keyframes slideInLeft {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Category info */
+  .bike-meta {
+    margin-bottom: 30px;
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideInLeft 0.6s ease forwards;
+  }
+
+  .bike-meta:nth-of-type(1) { animation-delay: 0.2s; }
+  .bike-meta:nth-of-type(2) { animation-delay: 0.3s; }
+
+  .bike-category-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+  }
+
+  .bike-category-value {
+    font-size: 20px;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  /* Description */
+  .bike-description {
+    font-size: 16px;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+  }
+
+  .bike-description p {
+    margin-bottom: 18px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: revealText 0.6s ease forwards;
+  }
+
+  /* Stagger animation for each paragraph */
+  .bike-description p:nth-child(1) { animation-delay: 0.3s; }
+  .bike-description p:nth-child(2) { animation-delay: 0.5s; }
+  .bike-description p:nth-child(3) { animation-delay: 0.7s; }
+  .bike-description p:nth-child(4) { animation-delay: 0.9s; }
+
+  @keyframes revealText {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Bottom navigation - centered */
+  .bike-navigation {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-top: auto;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease 0.5s forwards;
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .nav-arrow-btn {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 24px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Slide effect background */
+  .nav-arrow-btn::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #87ceeb, #1e90ff);
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform 0.4s ease;
+    z-index: -1;
+  }
+
+  .nav-arrow-btn:hover::before {
+    transform: scale(1);
+  }
+
+  .nav-arrow-btn:hover {
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.15);
+    box-shadow: 0 8px 25px rgba(135, 206, 235, 0.4);
+  }
+
+  /* Arrow icon animation */
+  .nav-arrow-btn span {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .nav-arrow-btn.prev-btn:hover span {
+    animation: slideLeft 0.6s ease infinite;
+  }
+
+  .nav-arrow-btn.next-btn:hover span {
+    animation: slideRight 0.6s ease infinite;
+  }
+
+  @keyframes slideLeft {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(-5px); }
+  }
+
+  @keyframes slideRight {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
+  }
+
+  /* Know More button - bottom right */
+  .know-more-btn {
+    position: fixed;
+    bottom: 50px;
+    right: 60px;
+    z-index: 3;
+    padding: 18px 45px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 50px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: translateX(30px);
+    animation: slideInRight 0.8s ease 0.6s forwards;
+  }
+
+  @keyframes slideInRight {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .know-more-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.7);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Default background if no image */
+  .bike-detail-page.no-image {
+    background: linear-gradient(135deg, #1a2942 0%, #0f1823 100%);
+  }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .bike-detail-page {
+      padding: 80px 30px 100px;
+      background-attachment: scroll;
+    }
+
+    .bike-full-name {
+      font-size: 36px;
+    }
+
+    .bike-category-value {
+      font-size: 18px;
+    }
+
+    .bike-description {
+      font-size: 14px;
+    }
+
+    .nav-arrow-btn {
+      width: 50px;
+      height: 50px;
+      font-size: 20px;
+    }
+
+    .know-more-btn {
+      bottom: 30px;
+      right: 30px;
+      padding: 14px 30px;
+      font-size: 14px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bike-detail-page {% if not bike.image_url %}no-image{% endif %}" 
+     {% if bike.image_url %}style="background-image: url('{{ bike.image_url }}');"{% endif %}>
+  
+  <!-- Bike Information - Top Left -->
+  <div class="bike-content">
+    <!-- Full Bike Name -->
+    <h1 class="bike-full-name">{{ bike.company_name }} {{ bike.bike_name }}</h1>
+    
+    <!-- Category -->
+    <div class="bike-meta">
+      <div class="bike-category-label">Category</div>
+      <div class="bike-category-value">{{ bike.category_name }}</div>
+    </div>
+    
+    <!-- Release Date -->
+    <div class="bike-meta">
+      <div class="bike-category-label">Release Date</div>
+      <div class="bike-category-value">{{ bike.year if bike.year else 'N/A' }}</div>
+    </div>
+    
+    <!-- Description -->
+    <div class="bike-description">
+      {% if bike.description %}
+        {% set paragraphs = bike.description.split('\n\n') %}
+        {% for paragraph in paragraphs %}
+          {% if paragraph.strip() %}
+            <p>{{ paragraph.strip() }}</p>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        <p>No description available for this bike.</p>
+      {% endif %}
+    </div>
+  </div>
+  
+  <!-- Navigation Arrows - Bottom Center -->
+  <div class="bike-navigation">
+    <a href="{% if prev_url %}{{ prev_url }}{% else %}/bike/{{ prev_bike_id }}{% endif %}" class="nav-arrow-btn prev-btn" title="Previous Bike">
+      <span>←</span>
+    </a>
+    <a href="{% if next_url %}{{ next_url }}{% else %}/bike/{{ next_bike_id }}{% endif %}" class="nav-arrow-btn next-btn" title="Next Bike">
+      <span>→</span>
+    </a>
+  </div>
+  
+  <!-- Know More Button - Bottom Right -->
+  <a href="{{ bike.website_link }}" target="_blank" class="know-more-btn">
+    Know More
+  </a>
+</div>
+{% endblock %}
